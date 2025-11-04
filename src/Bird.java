@@ -7,8 +7,10 @@ import javafx.scene.image.Image;
 public class Bird {
     private double x, y;
     private double velocity;
-    private final double gravity = 0.5;
-    private final double jumpStrength = -10;
+    // Tuned physics for more playable feel
+    private final double gravity = 0.02;
+    private final double jumpStrength = -2.5;
+    private final double maxVelocity = 1;
 
     private Image[] birdImages;
     private int currentFrame = 0;
@@ -43,6 +45,12 @@ public class Bird {
 
     public void update() {
         velocity += gravity;
+
+        // Limit maximum falling speed
+        if (velocity > maxVelocity) {
+            velocity = maxVelocity;
+        }
+
         y += velocity;
 
         // Update animation

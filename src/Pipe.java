@@ -7,10 +7,10 @@ import javafx.scene.image.Image;
 public class Pipe {
     private double x;
     private double gapY; // Y position of the gap center
-    private final double gapHeight = 120;
+    private final double gapHeight = 150; // bigger gap for easier gameplay
     private final double width = 52;
-    private final double pipeHeight = 320;
-    private final double speed = 2;
+    private final double pipeHeight = 400; // taller pipes
+    private final double speed = 0.8; // slower horizontal speed
 
     private Image pipeTopImage;
     private Image pipeBottomImage;

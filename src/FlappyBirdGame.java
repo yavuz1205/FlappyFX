@@ -49,10 +49,10 @@ public class FlappyBirdGame {
     private boolean gameOver = false;
 
     private double groundX = 0;
-    private final double groundSpeed = 2;
+    private final double groundSpeed = 0.15; // 10x slower than pipes for parallax effect
 
     private int frameCount = 0;
-    private final int pipeSpawnInterval = 90; // frames
+    private final int pipeSpawnInterval = 120; // ~2 seconds at 60fps
 
     public FlappyBirdGame() {
         random = new Random();
@@ -152,7 +152,12 @@ public class FlappyBirdGame {
     }
 
     private void update() {
-        if (!gameStarted || gameOver) {
+        if (gameOver) {
+            return;
+        }
+
+        if (!gameStarted) {
+            // Kuş oyun başlamadan hareketsiz kalır
             return;
         }
 
@@ -169,8 +174,9 @@ public class FlappyBirdGame {
 
         // Spawn pipes
         if (frameCount % pipeSpawnInterval == 0) {
-            double minGapY = 150;
-            double maxGapY = HEIGHT - GROUND_HEIGHT - 150;
+            // Keep gap center between 200 and 500 (safe playable zone)
+            double minGapY = 200;
+            double maxGapY = HEIGHT - GROUND_HEIGHT - 200;
             double gapY = minGapY + random.nextDouble() * (maxGapY - minGapY);
 
             String pipeColor = random.nextBoolean() ? "green" : "red";
@@ -202,8 +208,8 @@ public class FlappyBirdGame {
         }
         pipes.removeAll(pipesToRemove);
 
-        // Check ground and ceiling collision
-        if (bird.getY() + bird.getHeight() >= HEIGHT - GROUND_HEIGHT || bird.getY() <= 0) {
+        // Check ground and ceiling collision (grace period after start)
+        if (frameCount > 12 && (bird.getY() + bird.getHeight() >= HEIGHT - GROUND_HEIGHT || bird.getY() <= 0)) {
             endGame();
         }
     }
