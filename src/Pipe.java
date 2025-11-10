@@ -6,11 +6,11 @@ import javafx.scene.image.Image;
  */
 public class Pipe {
     private double x;
-    private double gapY; // Y position of the gap center
-    private final double gapHeight = 150; // bigger gap for easier gameplay
-    private final double width = 52;
-    private final double pipeHeight = 400; // taller pipes
-    private final double speed = 0.8; // slower horizontal speed
+    private double gapY;
+    private final double gapHeight = 160;
+    private final double width = 70;
+    private final double pipeHeight = 500;
+    private final double speed = .2;
 
     private Image pipeTopImage;
     private Image pipeBottomImage;
@@ -54,17 +54,17 @@ public class Pipe {
     }
 
     public boolean collidesWith(Bird bird) {
-        double birdLeft = bird.getX();
-        double birdRight = bird.getX() + bird.getWidth();
-        double birdTop = bird.getY();
-        double birdBottom = bird.getY() + bird.getHeight();
+        double hitboxMargin = 3;
+        
+        double birdLeft = bird.getX() + hitboxMargin;
+        double birdRight = bird.getX() + bird.getWidth() - hitboxMargin;
+        double birdTop = bird.getY() + hitboxMargin;
+        double birdBottom = bird.getY() + bird.getHeight() - hitboxMargin;
 
         double pipeLeft = x;
         double pipeRight = x + width;
 
-        // Check if bird is horizontally aligned with pipe
         if (birdRight > pipeLeft && birdLeft < pipeRight) {
-            // Check if bird hits top or bottom pipe
             double topPipeBottom = gapY - gapHeight / 2;
             double bottomPipeTop = gapY + gapHeight / 2;
 

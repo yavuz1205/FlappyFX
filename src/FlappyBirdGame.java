@@ -42,6 +42,10 @@ public class FlappyBirdGame {
     private AudioClip hitSound;
     private AudioClip dieSound;
     private AudioClip swooshSound;
+    
+    private Font flappyFont;
+    private Font flappyFontSmall;
+    private Font flappyFontMedium;
 
     private int score = 0;
     private int highScore = 0;
@@ -49,43 +53,72 @@ public class FlappyBirdGame {
     private boolean gameOver = false;
 
     private double groundX = 0;
-    private final double groundSpeed = 0.15; // 10x slower than pipes for parallax effect
+    private final double groundSpeed = .2;
 
     private int frameCount = 0;
-    private final int pipeSpawnInterval = 120; // ~2 seconds at 60fps
+    private final int pipeSpawnInterval = 1000;
+    private String birdColor;
+    
+    private BirdSelectionScreen selectionScreen;
+    private boolean showingBirdSelection = false;
+    
+    private static class ChangeBirdButton {
+        double x, y, width, height;
+        
+        ChangeBirdButton(double x, double y, double width, double height) {
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+        }
+        
+        boolean contains(double mx, double my) {
+            return mx >= x && mx <= x + width && my >= y && my <= y + height;
+        }
+    }
+    
+    private ChangeBirdButton changeBirdButton;
 
-    public FlappyBirdGame() {
+    public FlappyBirdGame(String birdColor) {
+        this.birdColor = birdColor;
         random = new Random();
         pipes = new ArrayList<>();
         loadAssets();
+        selectionScreen = new BirdSelectionScreen();
+        
+        double buttonWidth = 160;
+        double buttonHeight = 55;
+        changeBirdButton = new ChangeBirdButton(WIDTH - buttonWidth - 15, HEIGHT - buttonHeight - 15, buttonWidth, buttonHeight);
     }
 
     private void loadAssets() {
         try {
-            // Load background (day or night randomly)
             String bgType = random.nextBoolean() ? "day" : "night";
             backgroundImage = new Image(
                     getClass().getResourceAsStream("/assets/sprites/background-" + bgType + ".png"));
 
-            // Load ground
             groundImage = new Image(getClass().getResourceAsStream("/assets/sprites/base.png"));
 
-            // Load game over and message
             gameOverImage = new Image(getClass().getResourceAsStream("/assets/sprites/gameover.png"));
             messageImage = new Image(getClass().getResourceAsStream("/assets/sprites/message.png"));
 
-            // Load number images for score
             numberImages = new Image[10];
             for (int i = 0; i < 10; i++) {
                 numberImages[i] = new Image(getClass().getResourceAsStream("/assets/sprites/" + i + ".png"));
             }
-
-            // Load sounds
-            jumpSound = new AudioClip(getClass().getResource("/assets/audio/wing.wav").toString());
-            pointSound = new AudioClip(getClass().getResource("/assets/audio/point.wav").toString());
-            hitSound = new AudioClip(getClass().getResource("/assets/audio/hit.wav").toString());
-            dieSound = new AudioClip(getClass().getResource("/assets/audio/die.wav").toString());
-            swooshSound = new AudioClip(getClass().getResource("/assets/audio/swoosh.wav").toString());
+            
+            flappyFont = Font.loadFont(getClass().getResourceAsStream("/assets/FlappybirdyRegular-KaBW.ttf"), 36);
+            flappyFontSmall = Font.loadFont(getClass().getResourceAsStream("/assets/FlappybirdyRegular-KaBW.ttf"), 20);
+            flappyFontMedium = Font.loadFont(getClass().getResourceAsStream("/assets/FlappybirdyRegular-KaBW.ttf"), 24);
+            
+            if (flappyFont == null || flappyFontSmall == null || flappyFontMedium == null) {
+                System.err.println("Error loading font, using default");
+                flappyFont = Font.font("Arial", FontWeight.BOLD, 36);
+                flappyFontSmall = Font.font("Arial", FontWeight.BOLD, 18);
+                flappyFontMedium = Font.font("Arial", FontWeight.BOLD, 24);
+            } else {
+                System.out.println("Flappy Bird font loaded successfully!");
+            }
 
         } catch (Exception e) {
             System.err.println("Error loading assets: " + e.getMessage());
@@ -100,9 +133,6 @@ public class FlappyBirdGame {
         StackPane root = new StackPane(canvas);
         Scene scene = new Scene(root, WIDTH, HEIGHT);
 
-        // Bird starts at center
-        String[] birdColors = { "yellow", "blue", "red" };
-        String birdColor = birdColors[random.nextInt(birdColors.length)];
         bird = new Bird(WIDTH / 4, HEIGHT / 2, birdColor);
 
         // Input handling
@@ -114,7 +144,13 @@ public class FlappyBirdGame {
             }
         });
 
-        scene.setOnMouseClicked(e -> handleJump());
+        scene.setOnMouseClicked(e -> handleMouseClick(e.getX(), e.getY()));
+        
+        scene.setOnMouseMoved(e -> {
+            if (showingBirdSelection) {
+                selectionScreen.updateMousePosition(e.getX(), e.getY());
+            }
+        });
 
         primaryStage.setTitle("Flappy Bird");
         primaryStage.setScene(scene);
@@ -124,7 +160,25 @@ public class FlappyBirdGame {
         startGameLoop();
     }
 
+    private void handleMouseClick(double x, double y) {
+        if (showingBirdSelection) {
+            String selectedColor = selectionScreen.checkBirdClick(x, y);
+            if (selectedColor != null) {
+                birdColor = selectedColor;
+                bird = new Bird(WIDTH / 4, bird.getY(), birdColor);
+                bird.reset(bird.getY());
+                showingBirdSelection = false;
+            }
+        } else if (!gameStarted && changeBirdButton.contains(x, y)) {
+            showingBirdSelection = true;
+        } else {
+            handleJump();
+        }
+    }
+    
     private void handleJump() {
+        if (showingBirdSelection) return;
+        
         if (!gameStarted) {
             gameStarted = true;
             if (swooshSound != null) {
@@ -152,12 +206,16 @@ public class FlappyBirdGame {
     }
 
     private void update() {
+        if (showingBirdSelection) {
+            selectionScreen.updateAnimation();
+            return;
+        }
+        
         if (gameOver) {
             return;
         }
 
         if (!gameStarted) {
-            // Kuş oyun başlamadan hareketsiz kalır
             return;
         }
 
@@ -172,11 +230,9 @@ public class FlappyBirdGame {
             groundX = 0;
         }
 
-        // Spawn pipes
         if (frameCount % pipeSpawnInterval == 0) {
-            // Keep gap center between 200 and 500 (safe playable zone)
-            double minGapY = 200;
-            double maxGapY = HEIGHT - GROUND_HEIGHT - 200;
+            double minGapY = 180;
+            double maxGapY = HEIGHT - GROUND_HEIGHT - 180;
             double gapY = minGapY + random.nextDouble() * (maxGapY - minGapY);
 
             String pipeColor = random.nextBoolean() ? "green" : "red";
@@ -209,7 +265,7 @@ public class FlappyBirdGame {
         pipes.removeAll(pipesToRemove);
 
         // Check ground and ceiling collision (grace period after start)
-        if (frameCount > 12 && (bird.getY() + bird.getHeight() >= HEIGHT - GROUND_HEIGHT || bird.getY() <= 0)) {
+        if (bird.getY() + bird.getHeight() >= HEIGHT - GROUND_HEIGHT || bird.getY() <= -5) {
             endGame();
         }
     }
@@ -265,6 +321,37 @@ public class FlappyBirdGame {
             gc.fillText("High Score: " + highScore, WIDTH / 2 - 50, HEIGHT / 2 + 70);
             gc.fillText("Press R to Restart", WIDTH / 2 - 60, HEIGHT / 2 + 100);
         }
+        
+        if (!gameStarted && !showingBirdSelection) {
+            drawChangeBirdButton();
+        }
+        
+        if (showingBirdSelection) {
+            selectionScreen.render(gc, WIDTH, HEIGHT);
+        }
+    }
+    
+    private void drawChangeBirdButton() {
+        gc.setFill(Color.rgb(255, 200, 50));
+        gc.fillRoundRect(changeBirdButton.x, changeBirdButton.y, changeBirdButton.width, changeBirdButton.height, 10, 10);
+        
+        gc.setFill(Color.rgb(255, 150, 0));
+        gc.fillRoundRect(changeBirdButton.x + 3, changeBirdButton.y + 3, changeBirdButton.width - 6, changeBirdButton.height - 6, 8, 8);
+        
+        gc.setStroke(Color.rgb(150, 80, 0));
+        gc.setLineWidth(3);
+        gc.strokeRoundRect(changeBirdButton.x, changeBirdButton.y, changeBirdButton.width, changeBirdButton.height, 10, 10);
+        
+        gc.setFill(Color.WHITE);
+        gc.setFont(flappyFontSmall);
+        
+        javafx.scene.text.Text text = new javafx.scene.text.Text("CHANGE BIRD");
+        text.setFont(flappyFontSmall);
+        double textWidth = text.getLayoutBounds().getWidth();
+        double textX = changeBirdButton.x + (changeBirdButton.width - textWidth) / 2;
+        double textY = changeBirdButton.y + changeBirdButton.height / 2 + 6;
+        
+        gc.fillText("CHANGE BIRD", textX, textY);
     }
 
     private void drawScore() {
