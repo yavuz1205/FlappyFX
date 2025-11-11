@@ -1,15 +1,15 @@
 # Flappy Bird - JavaFX Edition
 
-Classic Flappy Bird game implemented in JavaFX with smooth animations and sound effects.
+Classic Flappy Bird game implemented in JavaFX.
 
-## 🎮 How to Play
+## How to Play
 
 - **SPACE** or **Click Mouse**: Make the bird jump
 - **R**: Restart game (when game over)
 
 Navigate through the pipes without hitting them or the ground. Each pipe you pass increases your score!
 
-## 🎯 Game Features
+## Game Features
 
 - Smooth bird animations with different color variations (yellow, red, blue)
 - Dynamic pipe generation with random heights
@@ -18,28 +18,66 @@ Navigate through the pipes without hitting them or the ground. Each pipe you pas
 - High score tracking
 - Animated ground scrolling
 
-## 🏃 Running the Game
+## Installation and Setup
 
-Make sure you have JavaFX installed and configured. Then run:
+### Prerequisites
+
+- Java Development Kit 11 or higher
+- Maven 3.6 or higher (Optional but recommended)
+
+**Note:** The project can be run without Maven, but you will need to manually download JavaFX SDK and configure the module path. Using Maven is recommended for easier setup.
+
+### Installing Maven
+
+**Windows:**
+
+1. Download Maven from [https://maven.apache.org/download.cgi](https://maven.apache.org/download.cgi)
+2. Extract the archive to a directory
+3. Add Maven bin directory to PATH environment variable
+4. Verify installation: `mvn -version`
+
+**macOS:**
 
 ```bash
-java Main.java
+brew install maven
 ```
 
-## 📁 Project Structure
+**Linux (Debian/Ubuntu):**
 
-The project's source code is located in the `src` directory.
+```bash
+sudo apt update
+sudo apt install maven
+```
 
-- `src/`: Main directory for all source code.
-  - `Bird.java`: Bird character with physics and animation
-  - `Pipe.java`: Pipe obstacles with collision detection
-  - `FlappyBirdGame.java`: Main game logic and rendering
-  - `Main.java`: Application entry point
-  - `assets/`: Contains all game assets
-    - `sprites/`: Images for bird, pipes, background, ground, and UI
-    - `audio/`: Sound effects (WAV and OGG formats)
+**Linux (Fedora):**
 
-## 🎨 Assets
+```bash
+sudo dnf install maven
+```
+
+For more installation options, visit: [https://maven.apache.org/install.html](https://maven.apache.org/install.html)
+
+### Setup Instructions
+
+1. **Clone the repository:**
+
+   ```bash
+   git clone https://github.com/yavuz1205/FlappyFX.git
+   cd FlappyFX
+   ```
+
+2. **Build the project:**
+
+   ```bash
+   mvn clean compile
+   ```
+
+3. **Run the game:**
+   ```bash
+   mvn javafx:run
+   ```
+
+## Assets
 
 All sprites and sounds are included in the `assets` folder:
 
@@ -49,4 +87,23 @@ All sprites and sounds are included in the `assets` folder:
 - Number sprites for score display
 - Sound effects for all game events
 
-Enjoy the game! 🐦
+## Attributions and Licenses
+
+**Font**
+
+- _Flappy Bird Regular_ by FontofFame (2015)  
+  Licensed under FontStruct Non-Commercial License — commercial and non-commercial use allowed.  
+  Source: [https://online-fonts.com/fonts/flappy-bird](https://online-fonts.com/fonts/flappy-bird)
+
+**Assets**
+
+- _Flappy Bird Assets_ (sprites and sounds) by Samuel Custodio (2019)  
+  Licensed under the MIT License.  
+  Source: [https://github.com/samuelcust/flappy-bird-assets](https://github.com/samuelcust/flappy-bird-assets)
+
+Parts of this project (sprites and audio) are licensed under the MIT License © 2019 Samuel Custodio.  
+See `/assets/LICENSE` for details.
+
+---
+
+Enjoy the game :)

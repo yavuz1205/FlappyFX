@@ -121,6 +121,21 @@ public class FlappyBirdGame {
                 System.out.println("Flappy Bird font loaded successfully!");
             }
 
+            jumpSound = new AudioClip(getClass().getResource("/assets/audio/wing.wav").toString());
+            jumpSound.setVolume(0.1);
+
+            pointSound = new AudioClip(getClass().getResource("/assets/audio/point.wav").toString());
+            pointSound.setVolume(0.1);
+
+            hitSound = new AudioClip(getClass().getResource("/assets/audio/hit.wav").toString());
+            hitSound.setVolume(0.1);
+
+            dieSound = new AudioClip(getClass().getResource("/assets/audio/die.wav").toString());
+            dieSound.setVolume(0.1);
+
+            swooshSound = new AudioClip(getClass().getResource("/assets/audio/swoosh.wav").toString());
+            swooshSound.setVolume(0.1);
+
         } catch (Exception e) {
             System.err.println("Error loading assets: " + e.getMessage());
             e.printStackTrace();
@@ -153,7 +168,7 @@ public class FlappyBirdGame {
             }
         });
 
-        primaryStage.setTitle("Flappy Bird");
+        primaryStage.setTitle("FlappyFX");
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
         primaryStage.show();
