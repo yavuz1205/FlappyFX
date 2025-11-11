@@ -7,14 +7,14 @@ import javafx.scene.image.Image;
 public class Bird {
     private double x, y;
     private double velocity;
-    private final double gravity = 0.007;
-    private final double jumpStrength = -1.2;
+    private final double gravity = 0.005;
+    private final double jumpStrength = -1.0;
     private final double maxVelocity = 12.0;
 
     private Image[] birdImages;
     private int currentFrame = 0;
     private int animationCounter = 0;
-    private final int animationSpeed = 5;
+    private final int animationSpeed = 20;
 
     private final double width = 44;
     private final double height = 32;

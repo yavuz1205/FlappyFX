@@ -36,7 +36,6 @@ public class Pipe {
     public void render(GraphicsContext gc, double groundY) {
         if (pipeTopImage != null && pipeBottomImage != null) {
             // Draw top pipe (upside down)
-            // double topPipeY = gapY - gapHeight / 2 - pipeHeight;
             gc.save();
             gc.translate(x + width / 2, gapY - gapHeight / 2);
             gc.scale(1, -1);
@@ -55,7 +54,7 @@ public class Pipe {
 
     public boolean collidesWith(Bird bird) {
         double hitboxMargin = 3;
-        
+
         double birdLeft = bird.getX() + hitboxMargin;
         double birdRight = bird.getX() + bird.getWidth() - hitboxMargin;
         double birdTop = bird.getY() + hitboxMargin;
