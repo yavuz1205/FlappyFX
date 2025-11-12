@@ -2,6 +2,8 @@
 
 Classic Flappy Bird game implemented in JavaFX.
 
+<img width="597" height="832" alt="image" src="https://github.com/user-attachments/assets/a7bd2a57-c99b-4286-ada5-edad3c36362d" />
+
 ## How to Play
 
 - **SPACE** or **Click Mouse**: Make the bird jump
