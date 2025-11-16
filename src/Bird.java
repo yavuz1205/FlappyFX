@@ -8,7 +8,7 @@ public class Bird {
     private double x, y;
     private double velocity;
     private final double gravity = 0.005;
-    private final double jumpStrength = -1.0;
+    private final double jumpStrength = -.83;
     private final double maxVelocity = 12.0;
 
     private Image[] birdImages;

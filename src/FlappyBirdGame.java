@@ -58,6 +58,8 @@ public class FlappyBirdGame {
     private int frameCount = 0;
     private final int pipeSpawnInterval = 1000;
     private String birdColor;
+    private String backgroundType;
+    private int lastBackgroundChangeScore = 0;
 
     private BirdSelectionScreen selectionScreen;
     private boolean showingBirdSelection = false;
@@ -77,7 +79,23 @@ public class FlappyBirdGame {
         }
     }
 
+    private static class ChangeBackgroundButton {
+        double x, y, width, height;
+
+        ChangeBackgroundButton(double x, double y, double width, double height) {
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+        }
+
+        boolean contains(double mx, double my) {
+            return mx >= x && mx <= x + width && my >= y && my <= y + height;
+        }
+    }
+
     private ChangeBirdButton changeBirdButton;
+    private ChangeBackgroundButton changeBackgroundButton;
 
     public FlappyBirdGame(String birdColor) {
         this.birdColor = birdColor;
@@ -88,15 +106,19 @@ public class FlappyBirdGame {
 
         double buttonWidth = 160;
         double buttonHeight = 55;
+        double buttonSpacing = 10;
+
         changeBirdButton = new ChangeBirdButton(WIDTH - buttonWidth - 15, HEIGHT - buttonHeight - 15, buttonWidth,
                 buttonHeight);
+        changeBackgroundButton = new ChangeBackgroundButton(WIDTH - buttonWidth - 15, 
+                HEIGHT - (buttonHeight * 2) - buttonSpacing - 15, buttonWidth, buttonHeight);
     }
 
     private void loadAssets() {
         try {
-            String bgType = random.nextBoolean() ? "day" : "night";
+            backgroundType = random.nextBoolean() ? "day" : "night";
             backgroundImage = new Image(
-                    getClass().getResourceAsStream("/assets/sprites/background-" + bgType + ".png"));
+                    getClass().getResourceAsStream("/assets/sprites/background-" + backgroundType + ".png"));
 
             groundImage = new Image(getClass().getResourceAsStream("/assets/sprites/base.png"));
 
@@ -187,6 +209,8 @@ public class FlappyBirdGame {
             }
         } else if (!gameStarted && changeBirdButton.contains(x, y)) {
             showingBirdSelection = true;
+        } else if (!gameStarted && changeBackgroundButton.contains(x, y)) {
+            changeBackground();
         } else {
             handleJump();
         }
@@ -198,16 +222,28 @@ public class FlappyBirdGame {
 
         if (!gameStarted) {
             gameStarted = true;
-            if (swooshSound != null) {
-                swooshSound.play();
-            }
+            // TODO: This makes the game laggy
+            // if (swooshSound != null) {
+            //     swooshSound.play();
+            // }
         }
 
         if (!gameOver) {
             bird.jump();
-            if (jumpSound != null) {
-                jumpSound.play();
-            }
+            // TODO: This makes the game laggy
+            // if (jumpSound != null) {
+            //     jumpSound.play();
+            // }
+        }
+    }
+
+    private void changeBackground() {
+        backgroundType = backgroundType.equals("day") ? "night" : "day";
+        try {
+            backgroundImage = new Image(
+                    getClass().getResourceAsStream("/assets/sprites/background-" + backgroundType + ".png"));
+        } catch (Exception e) {
+            System.err.println("Error loading background image: " + e.getMessage());
         }
     }
 
@@ -268,8 +304,13 @@ public class FlappyBirdGame {
 
             if (pipe.hasPassed(bird)) {
                 score++;
-                if (pointSound != null) {
-                    pointSound.play();
+                // TODO: This makes the game laggy
+                // if (pointSound != null) {
+                //     pointSound.play();
+                // }
+                if (score % 10 == 0 && score != lastBackgroundChangeScore) {
+                    lastBackgroundChangeScore = score;
+                    changeBackground();
                 }
             }
 
@@ -393,6 +434,7 @@ public class FlappyBirdGame {
 
         if (!gameStarted && !showingBirdSelection) {
             drawChangeBirdButton();
+            drawChangeBackgroundButton();
         }
 
         if (showingBirdSelection) {
@@ -424,6 +466,33 @@ public class FlappyBirdGame {
         double textY = changeBirdButton.y + changeBirdButton.height / 2 + 6;
 
         gc.fillText("CHANGE BIRD", textX, textY);
+    }
+
+    private void drawChangeBackgroundButton() {
+        gc.setFill(Color.rgb(100, 150, 255));
+        gc.fillRoundRect(changeBackgroundButton.x, changeBackgroundButton.y, changeBackgroundButton.width, 
+                changeBackgroundButton.height, 10, 10);
+
+        gc.setFill(Color.rgb(50, 100, 200));
+        gc.fillRoundRect(changeBackgroundButton.x + 3, changeBackgroundButton.y + 3, changeBackgroundButton.width - 6,
+                changeBackgroundButton.height - 6, 8, 8);
+
+        gc.setStroke(Color.rgb(30, 50, 120));
+        gc.setLineWidth(3);
+        gc.strokeRoundRect(changeBackgroundButton.x, changeBackgroundButton.y, changeBackgroundButton.width, 
+                changeBackgroundButton.height, 10, 10);
+
+        gc.setFill(Color.WHITE);
+        gc.setFont(flappyFontMedium);
+
+        String buttonText = backgroundType.equals("day") ? "NIGHT MODE" : "DAY MODE";
+        javafx.scene.text.Text text = new javafx.scene.text.Text(buttonText);
+        text.setFont(flappyFontSmall);
+        double textWidth = text.getLayoutBounds().getWidth();
+        double textX = changeBackgroundButton.x + (changeBackgroundButton.width - textWidth) / 2;
+        double textY = changeBackgroundButton.y + changeBackgroundButton.height / 2 + 6;
+
+        gc.fillText(buttonText, textX, textY);
     }
 
     private void drawScore() {
@@ -467,6 +536,7 @@ public class FlappyBirdGame {
         gameStarted = false;
         score = 0;
         frameCount = 0;
+        lastBackgroundChangeScore = 0;
         pipes.clear();
         bird.reset(HEIGHT / 2);
 
